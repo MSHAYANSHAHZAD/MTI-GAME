@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master The Instruction</title>
+
+<link rel="manifest" href="manifest.json">
+
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("service-worker.js");
+}
+</script>
+
+<style>
+body {
+  margin:0;
+  background:#000;
+  font-family:Arial, sans-serif;
+  color:white;
+  text-align:center;
+}
+#game {
+  max-width:400px;
+  margin:auto;
+  padding-top:40px;
+}
+#instruction {
+  font-size:24px;
+  margin:30px;
+  min-height:60px;
+}
+#signal {
+  font-size:40px;
+  margin:20px;
+  height:50px;
+}
+#btn {
+  width:200px;
+  height:200px;
+  border-radius:50%;
+  background:#00ffff;
+  border:none;
+  font-size:22px;
+  font-weight:bold;
+  color:#000;
+}
+#score {
+  font-size:20px;
+  margin-top:20px;
+}
+</style>
+</head>
+<body>
+
+<div id="game">
+  <h2>🎮 MASTER THE INSTRUCTION 🎮</h2>
+  <div id="instruction">Press Start</div>
+  <div id="signal"></div>
+  <button id="btn">START</button>
+  <div id="score">Score: 0</div>
+</div>
+
+<script>
+const instructionText = document.getElementById("instruction");
+const signalText = document.getElementById("signal");
+const button = document.getElementById("btn");
+const scoreText = document.getElementById("score");
+
+let score = 0;
+let waitingForPress = false;
+let correctPressTime = false;
+let gameStarted = false;
+
+const instructions = [
+  { text:"Press when you see GO", signal:"GO", correct:true },
+  { text:"DON'T press when STOP appears", signal:"STOP", correct:false },
+  { text:"Press immediately when NOW appears", signal:"NOW", correct:true },
+  { text:"Wait... then press when ★ appears", signal:"★", correct:true },
+  { text:"If text says NOW, do NOT press", signal:"NOW", correct:false },
+  { text:"Press only if symbol is 🔵", signal:"🔵", correct:true },
+  { text:"Ignore this instruction 😈", signal:"GO", correct:false },
+  { text:"Press when you see YES", signal:"YES", correct:true }
+];
+
+function randomInstruction(){
+  return instructions[Math.floor(Math.random()*instructions.length)];
+}
+
+function startRound(){
+  const inst = randomInstruction();
+  instructionText.innerText = inst.text;
+  signalText.innerText = "";
+  correctPressTime = false;
+  waitingForPress = true;
+
+  setTimeout(()=>{
+    signalText.innerText = inst.signal;
+    correctPressTime = inst.correct;
+
+    setTimeout(()=>{
+      if(waitingForPress){ gameOver(); }
+    }, 1200);
+
+  }, 1000);
+}
+
+function gameOver(){
+  alert("💥 Game Over!\nScore: " + score);
+  location.reload();
+}
+
+button.addEventListener("click", ()=>{
+  if(!gameStarted){
+    gameStarted = true;
+    button.innerText = "PRESS";
+    startRound();
+    return;
+  }
+
+  if(!waitingForPress){ gameOver(); return; }
+
+  waitingForPress = false;
+
+  if(correctPressTime){
+    score++;
+    scoreText.innerText = "Score: " + score;
+    setTimeout(startRound, 400);
+  } else {
+    gameOver();
+  }
+});
+</script>
+
+</body>
+</html>
