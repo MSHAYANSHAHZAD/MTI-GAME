@@ -27,13 +27,18 @@ body {
 }
 #instruction {
   font-size:24px;
-  margin:30px;
+  margin:20px;
   min-height:60px;
 }
 #signal {
   font-size:40px;
   margin:20px;
   height:50px;
+}
+#timer {
+  font-size:20px;
+  margin:10px;
+  color:#00ffff;
 }
 #btn {
   width:200px;
@@ -57,6 +62,7 @@ body {
   <h2>🎮 MASTER THE INSTRUCTION 🎮</h2>
   <div id="instruction">Press Start</div>
   <div id="signal"></div>
+  <div id="timer">Time: 10</div>
   <button id="btn">START</button>
   <div id="score">Score: 0</div>
 </div>
@@ -64,6 +70,7 @@ body {
 <script>
 const instructionText = document.getElementById("instruction");
 const signalText = document.getElementById("signal");
+const timerText = document.getElementById("timer");
 const button = document.getElementById("btn");
 const scoreText = document.getElementById("score");
 
@@ -71,6 +78,8 @@ let score = 0;
 let waitingForPress = false;
 let correctPressTime = false;
 let gameStarted = false;
+let timerInterval;
+let timeLeft = 10;
 
 const instructions = [
   { text:"Press when you see GO", signal:"GO", correct:true },
@@ -87,6 +96,21 @@ function randomInstruction(){
   return instructions[Math.floor(Math.random()*instructions.length)];
 }
 
+function startTimer(){
+  timeLeft = 10;
+  timerText.innerText = "Time: " + timeLeft;
+
+  timerInterval = setInterval(()=>{
+    timeLeft--;
+    timerText.innerText = "Time: " + timeLeft;
+
+    if(timeLeft <= 0){
+      clearInterval(timerInterval);
+      if(waitingForPress) gameOver();
+    }
+  },1000);
+}
+
 function startRound(){
   const inst = randomInstruction();
   instructionText.innerText = inst.text;
@@ -97,12 +121,8 @@ function startRound(){
   setTimeout(()=>{
     signalText.innerText = inst.signal;
     correctPressTime = inst.correct;
-
-    setTimeout(()=>{
-      if(waitingForPress){ gameOver(); }
-    }, 1200);
-
-  }, 1000);
+    startTimer();
+  },1000);
 }
 
 function gameOver(){
@@ -118,14 +138,18 @@ button.addEventListener("click", ()=>{
     return;
   }
 
-  if(!waitingForPress){ gameOver(); return; }
+  if(!waitingForPress){
+    gameOver();
+    return;
+  }
 
   waitingForPress = false;
+  clearInterval(timerInterval);
 
   if(correctPressTime){
     score++;
     scoreText.innerText = "Score: " + score;
-    setTimeout(startRound, 400);
+    setTimeout(startRound, 500);
   } else {
     gameOver();
   }
